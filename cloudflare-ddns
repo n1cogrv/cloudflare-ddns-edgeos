@@ -1,0 +1,173 @@
+#!/bin/sh
+
+export access_token="" # Start with "Bearer"
+export zone_identifier=""
+export record_name=""
+
+getWanIpv4Address() {
+    if [ "$(uname)" != "Linux" ]; then
+        echo "non-Linux is not supported." >&2
+        return 1
+    fi
+
+    local lanIpSegments="^$"
+    local ipv4Address=""
+
+    lanIpSegments="$lanIpSegments|(^10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$)"
+    lanIpSegments="$lanIpSegments|(^127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$)"
+    lanIpSegments="$lanIpSegments|(^169\.254\.[0-9]{1,3}\.[0-9]{1,3}$)"
+    lanIpSegments="$lanIpSegments|(^172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}$)"
+    lanIpSegments="$lanIpSegments|(^192\.168\.[0-9]{1,3}\.[0-9]{1,3}$)"
+
+    echo "Getting Network Ip locally using cli-program ip..." >&2
+
+    ipv4Address=$(
+        ip -oneline -4 address |
+            grep -v -E '\slo|\sdocker' |
+            awk '{ print $4 }' |
+            cut -d'/' -f1 |
+            grep -v -E "$lanIpSegments"
+    )
+
+
+    if [ -z "$ipv4Address" ]; then
+        echo "Failed to Get Network Ip locally." >&2
+        echo "Using api.ipify.org to retrieve ip..." >&2
+        if command -v curl >/dev/null 2>&1; then
+            echo "Using curl..." >&2
+            ipv4Address=$(curl --silent -L https://api.ipify.org)
+            echo "ip.ipify.org => $ipv4Address" >&2
+        elif command -v wget >/dev/null 2>&1; then
+            ipv4Address=$(wget --quiet -O- https://api.ipify.org)
+            echo "ip.ipify.org => $ipv4Address" >&2
+        else
+            echo "curl and wget are both unavailable/uninstalled. " >&2
+            echo "Please install one of them to resolve dependency problem" >&2
+            return 1
+        fi
+    else
+        echo "cli-program ip => $ipv4Address" >&2
+    fi
+
+    echo "$ipv4Address"
+
+}
+
+getCurrent4Record() {
+
+    local _retrieve_json
+    local _active_record_count
+
+    local currentRecordIp
+    local currentRecordId
+
+    echo "Curl to Cloudflare v4 api..." >&2
+
+    _retrieve_json=$(
+        curl --silent -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name&type=A" \
+            -H "Authorization: $access_token" \
+            -H "Content-Type: application/json"
+    )
+
+    # echo "$_retrieve_json" | jq -r '.'
+    _active_record_count=$(echo "$_retrieve_json" | jq -r '.result_info.count')
+
+    if [ $_active_record_count = 0 ]; then
+        echo "Record NOT Found." >&2
+        return 1
+    fi
+
+    currentRecordIp=$(echo "$_retrieve_json" | jq -r '.result[0].content')
+    currentRecordId=$(echo "$_retrieve_json" | jq -r '.result[0].id')
+    echo "$record_name  :  $currentRecordId" >&2
+    echo "$record_name --> $currentRecordIp" >&2
+
+    jq -r -c --null-input \
+        --arg id "$currentRecordId" \
+        --arg ip "$currentRecordIp" \
+        '{ recordId: $id, recordIp: $ip }'
+
+    # echo "{\"record_id\": \"$currentRecordId\", \"record_ip\": \"$currentRecordIp\"}"
+
+    # echo "$currentRecordId $currentRecordIp"
+}
+
+# TODO: JSON Build function
+
+# $1 Record Id
+# $2 Record Ip
+updateCurrent4Record() {
+    local recordId="$1"
+    local recordIp="$2"
+
+    echo "Attempting to point recordId $recordId to $recordIp via curl PUT..." >&2
+
+    local _retrieve_json
+    local _put_json
+
+    _retrieve_json=$(
+        curl --silent -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$recordId" \
+            -H "Authorization: $access_token" \
+            -H "Content-Type: application/json" \
+            --data "$(
+                jq -r -c --null-input \
+                    --arg record_name "$record_name" \
+                    --arg recordIp "$recordIp" \
+                    '{"type": "A", "name": $record_name, "content": $recordIp, "ttl": 100, "proxied": false}'
+            )"
+    )
+
+    if [ $(echo "$_retrieve_json" | jq -r '.success') = "true" ]; then
+        echo "$record_name is updated, now points to $recordIp" >&2
+        return 0
+    else
+        echo "$record_name update failed. Result pretty print as below." >&2
+        echo "$_retrieve_json" | jq -r '.' >&2
+        return 1
+    fi
+
+    return 0
+}
+
+updateMain() {
+    local _error
+    local _tmp
+
+    local recordId
+    local recordIp
+
+    local hostIp
+
+    echo "Getting Host Ip Address"
+
+    hostIp=$(getWanIpv4Address)
+    _error="$?"
+    echo "$hostIp"
+    if [ "$_error" -ne 0 ]; then
+        return 1
+    fi
+
+    echo "Getting Record Ip from Cloudflare"
+
+    _tmp=$(getCurrent4Record)
+    _error="$?"
+    recordId=$(echo "$_tmp" | jq -r '.recordId')
+    recordIp=$(echo "$_tmp" | jq -r '.recordIp')
+    if [ "$_error" -ne 0 ]; then
+        return 1
+    fi
+
+    if [ "$hostIp" = "$recordIp" ]; then
+        echo "Ip stays the same, no need to update. Exiting."
+        return 0
+    fi
+
+    echo "Updating Record Ip"
+
+    updateCurrent4Record "$recordId" "$hostIp"
+    _error="$?"
+    if [ "$_error" -ne 0 ]; then
+        return 1
+    fi
+
+}
