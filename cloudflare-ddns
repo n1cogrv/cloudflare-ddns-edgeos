@@ -23,11 +23,12 @@ getWanIpv4Address() {
 
     ipv4Address=$(
         ip -oneline -4 address |
-            grep --extended-regexp --invert-match '\sbr-|\slo|\sdocker' |
+            grep -v -E '\slo|\sdocker' |
             awk '{ print $4 }' |
             cut -d'/' -f1 |
-            grep --extended-regexp --invert-match "$lanIpSegments"
+            grep -v -E "$lanIpSegments"
     )
+
 
     if [ -z "$ipv4Address" ]; then
         echo "Failed to Get Network Ip locally." >&2
