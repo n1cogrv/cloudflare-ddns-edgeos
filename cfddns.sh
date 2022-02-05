@@ -2,7 +2,8 @@
 
 
 # Import utility function here
-. ./cloudflare-ddns
+# You `cloudflare-ddns` file ABSOLUTE PATH here!
+. /config/scripts/cloudflare-ddns-edgeos/cloudflare-ddns
 
 ########
 # Alter here
