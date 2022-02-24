@@ -1,6 +1,11 @@
-name: Manual Triggered Release
+name: Publish Tagged Commit to Releases Branch
 
-on: workflow_dispatch
+on: 
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
 
 jobs:
   release-on-tag:
