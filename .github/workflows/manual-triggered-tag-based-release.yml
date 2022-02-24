@@ -37,11 +37,11 @@ jobs:
           uses: s0/git-publish-subdir-action@develop
           env:
             REPO: self
-            BRANCH: release
+            BRANCH: releases
             FOLDER: release_dir
             SQUASH_HISTORY: false
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            MESSAGE: $${ steps.tagcheck.outputs.tagname }
+            MESSAGE: ${{ steps.tagcheck.outputs.tagname }}
 
 
         
