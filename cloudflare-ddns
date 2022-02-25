@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export access_token="" # Start with "Bearer"
+export access_token="" # Start with "Bearer "
 export zone_identifier=""
 export record_name=""
 
@@ -74,7 +74,7 @@ getCurrent4Record() {
 
     if [ $_active_record_count = 0 ]; then
         echo "Record NOT Found." >&2
-        return 1
+        return 127
     fi
 
     currentRecordIp=$(echo "$_retrieve_json" | jq -r '.result[0].content')
@@ -93,6 +93,43 @@ getCurrent4Record() {
 }
 
 # TODO: JSON Build function
+
+create4RecordIfNotExists() {
+    local hostIp="$1"
+    
+    echo "Attempting to CREATE record via curl POST..." >&2
+
+    local _retrieve_json
+    local _post_json
+
+    _retrieve_json=$(
+        curl --silent -X POST "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records" \
+            -H "Authorization: $access_token" \
+            -H "Content-Type: application/json" \
+            --data "$(
+                jq -r -c --null-input \
+                    --arg record_name "$record_name" \
+                    --arg recordIp "$hostIp" \
+                    '{"type": "A", "name": $record_name, "content": $recordIp, "ttl": 100, "proxied": false}'
+            )"
+    )
+
+    if [ $(echo "$_retrieve_json" | jq -r '.success') = "true" ]; then
+        echo "$record_name is CREATED." >&2
+        echo "If this is the first time you run this script, don't worry, it ran well. Proceed to next step in Documentation." >&2
+        echo "Record detail will follow in 5 seconds......"
+        echo "If NOT --> (Be advised) Your record name is not found on cloudflare, which leads to re-creation of the record." >&2
+        sleep 5
+        echo "$(getCurrent4Record)" >&2
+        exit 0
+    else
+        echo "$record_name creation failed. Result pretty print as below." >&2
+        echo "$_retrieve_json" | jq -r '.' >&2
+        exit 1
+    fi
+}
+
+
 
 # $1 Record Id
 # $2 Record Ip
@@ -151,9 +188,12 @@ updateMain() {
 
     _tmp=$(getCurrent4Record)
     _error="$?"
-    recordId=$(echo "$_tmp" | jq -r '.recordId')
-    recordIp=$(echo "$_tmp" | jq -r '.recordIp')
-    if [ "$_error" -ne 0 ]; then
+    if [ "$_error" -eq 0 ]; then
+        recordId=$(echo "$_tmp" | jq -r '.recordId')
+        recordIp=$(echo "$_tmp" | jq -r '.recordIp')
+    elif [ "$_error" -eq 127 ]; then
+        create4RecordIfNotExists
+    else
         return 1
     fi
 
