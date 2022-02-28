@@ -192,7 +192,7 @@ updateMain() {
         recordId=$(echo "$_tmp" | jq -r '.recordId')
         recordIp=$(echo "$_tmp" | jq -r '.recordIp')
     elif [ "$_error" -eq 127 ]; then
-        create4RecordIfNotExists
+        create4RecordIfNotExists $hostIp
     else
         return 1
     fi
