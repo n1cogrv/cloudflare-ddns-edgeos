@@ -15,11 +15,11 @@ export RECORD_NAME=""
 # -- Utilities Function -- #
 ############################
 err() {
-    echo >&2 "[ERROR] | $(date +'%Y-%m-%dT%H:%M:%S%z') | $*"
+    echo >&2 "[ERROR] | $(date +'%Y-%m-%dT%H:%M:%S') | $*"
 }
 
 info() {
-    echo >&2 "[INFO]  | $(date +'%Y-%m-%dT%H:%M:%S%z') | $*"
+    echo >&2 "[INFO] | $(date +'%Y-%m-%dT%H:%M:%S') | $*"
 }
 
 
@@ -33,7 +33,7 @@ get_wan_ipv4_addr() {
     local lan_ip_segments
     local ipv4_addr
 
-    if [ "$(uname)" != "Linux" ]; then
+    if [[ ! "$(uname)" == "Linux" ]]; then
         err "non-Linux Platform is not supported." 
         return 1
     fi
@@ -58,7 +58,7 @@ get_wan_ipv4_addr() {
     )
 
 
-    if [ -z "${ipv4_addr}" ]; then
+    if [[ -z "${ipv4_addr}" ]]; then
         err "Failed to Get Network Ip locally." 
         info "Using api.ipify.org to retrieve ip..." 
         if command -v curl >/dev/null 2>&1; then
@@ -96,7 +96,7 @@ getCurrent4Record() {
 
     _active_record_count=$(echo "${_retrieve_json}" | jq -r '.result_info.count')
 
-    if [ ${_active_record_count} = 0 ]; then
+    if [[ ${_active_record_count} == 0 ]]; then
         err "Record NOT Found." 
         return 127
     fi
@@ -171,7 +171,7 @@ updateCurrent4Record() {
             )"
     )
 
-    if [ $(echo "${_retrieve_json}" | jq -r '.success') = "true" ]; then
+    if [[ $(echo "${_retrieve_json}" | jq -r '.success') == "true" ]]; then
         info "${RECORD_NAME} is updated, now points to ${pending_record_ip}" 
         return 0
     else
@@ -196,7 +196,7 @@ main() {
 
     host_ip=$(get_wan_ipv4_addr)
     _error="$?"
-    if [ "${_error}" -ne 0 ]; then
+    if [[ "${_error}" -ne 0 ]]; then
         return 1
     fi
 
@@ -222,7 +222,7 @@ main() {
 
     updateCurrent4Record "${record_id}" "${host_ip}"
     _error="$?"
-    if [ "${_error}" -ne 0 ]; then
+    if [[ "${_error}" -ne 0 ]]; then
         return 1
     fi
 
