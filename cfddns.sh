@@ -23,4 +23,4 @@ record_name=""
 # Alter stops
 ########
 
-updateMain
+main
