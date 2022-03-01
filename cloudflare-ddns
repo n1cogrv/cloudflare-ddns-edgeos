@@ -2,9 +2,7 @@
 #
 # Cloudflare DDNS functions script
 
-set -o errexit
 # set -o xtrace
-
 
 ############################
 # --- Global Variables --- #
@@ -78,14 +76,14 @@ get_wan_ipv4_addr() {
         if command -v curl >/dev/null 2>&1; then
             info "Using curl..." 
             ipv4_addr=$(curl --silent -L https://api.ipify.org)
-            info "ip.ipify.org => ${ipv4_addr}"  
+            info "api called from ip.ipify.org => ${ipv4_addr}"  
         else
             err "curl is unavailable/uninstalled. " 
             err "Please install curl to resolve dependency problem" 
             return 1
         fi
     else
-        info "cli-program ip => ${ipv4_addr}" 
+        info "command-line tool ip => ${ipv4_addr}" 
     fi
 
     echo "${ipv4_addr}"
@@ -132,8 +130,8 @@ getCurrent4Record() {
 
     current_record_ip=$(echo "${_retrieve_json}" | jq -r '.result[0].content')
     current_record_id=$(echo "${_retrieve_json}" | jq -r '.result[0].id')
-    info "${RECORD_NAME} has corresponding cloudflare-side id: ${current_record_id}" 
-    info "${RECORD_NAME} now points to --> ${current_record_ip}" 
+    info "${RECORD_NAME} has cloudflare-side id: ${current_record_id}" 
+    info "${RECORD_NAME} currently points to --> ${current_record_ip}" 
 
     jq -r -c --null-input \
         --arg id "${current_record_id}" \
@@ -182,10 +180,10 @@ create4RecordIfNotExists() {
         info "${RECORD_NAME} is CREATED." 
         info "If this is the first time you run this script."
         info "Don't worry, it ran well. Proceed to next step in Documentation." 
-        info "Record detail will follow in 5 seconds......"
+        info "Record detail will follow in 3 seconds......"
         info "If NOT --> (Be advised) Your record name is not found on cloudflare."
         info ", which leads to auto-re-creation of the record." 
-        sleep 5
+        sleep 3
         info "$(getCurrent4Record)" 
         exit 0
     else
