@@ -80,11 +80,13 @@ Thus...this project.
 
 ## Release/Feature History
 
+### v1.2
+
++ Continuous-Delivery via `Github Action` is configured, build and push artifact to `releases` branch.
+
 ### v1.1
 
 + Automatically create dns record (No need to create record manually in advance).
-
-+ Continuous-Delivery via `Github Action` is configured, build and push artifact to `releases` branch.
 
 + Documentation & comments update (following shell style guideline).
 
