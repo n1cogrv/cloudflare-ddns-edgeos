@@ -213,7 +213,7 @@ main() {
         return 1
     fi
 
-    if [[ "${host_ip}" == "${record_id}" ]]; then
+    if [[ "${host_ip}" == "${record_ip}" ]]; then
         info "Ip stays the same, no need to update. Exiting."
         return 0
     fi
