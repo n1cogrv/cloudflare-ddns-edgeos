@@ -1,26 +1,27 @@
-#!/bin/sh
-
+#!/bin/bash
+#
+# Entrance File and Config File for cloudflare-ddns.
 
 # Import utility function here
 # You `cloudflare-ddns` file ABSOLUTE PATH here!
 . /config/scripts/cloudflare-ddns-edgeos/cloudflare-ddns
 
-########
-# Alter here
-########
+#######################
+# -Config- Alter here #
+#######################
 
 # Access Token generated from Cloudflare API token page
-access_token=""
+CF_ACCESS_TOKEN=""
 
 # Can be seen from your zone page, bottom right Zone id
-zone_identifier=""
+ZONE_IDENTIFIER=""
 
 # You DNS record name, with A subdomain
-record_name=""
+RECORD_NAME=""
 
 
-########
-# Alter stops
-########
+#######################
+# -Config- Stop here  #
+#######################
 
-updateMain
+main
