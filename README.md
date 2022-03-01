@@ -28,11 +28,23 @@ curl -LS -o /config/scripts/cloudflare-ddns-edgeos.tar.gz https://cdn.jsdelivr.n
 
 ### 2 - Deploy
 
-+ `tar -xvf /config/scripts/cloudflare-ddns-edgeos.tar.gz`
+#### Extraction
 
-+ Alter variables in `/config/scripts/cloudflare-ddns-edgeos/cfddns.sh`.
+```bash
+tar -xvf /config/scripts/cloudflare-ddns-edgeos.tar.gz
+```
 
-+ `+x` to files using `chmod +x /config/scripts/cloudflare-ddns-edgeos/cfddns.sh`
+#### Global Parameters Editing
+
+**!!! This step is IMPORTANT !!!**
+
+Alter variables in `/config/scripts/cloudflare-ddns-edgeos/cfddns.sh`
+
+Meanings & where-can-be-found of global parameters is provided in `cfddns.sh` via code comments.
+
+#### Extra Steps
+
+`+x` to files using `chmod +x /config/scripts/cloudflare-ddns-edgeos/cfddns.sh`
 
 ### 3 - Test 
 
@@ -67,6 +79,14 @@ Thus...this project.
 
 
 ## Release/Feature History
+
+### v1.1
+
++ Automatically create dns record (No need to create record manually in advance).
+
++ Continuous-Delivery via `Github Action` is configured, build and push artifact to `releases` branch.
+
++ Documentation & comments update (following shell style guideline).
 
 ### v1.0-hotfix
 
