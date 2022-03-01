@@ -33,7 +33,7 @@ jobs:
           run: |
             mkdir -p /tmp/cloudflare-ddns-edgeos/
             while IFS= read -r filename ; do if [ -f ./"$filename" ]; then cp "$filename" /tmp/cloudflare-ddns-edgeos/ ; fi ; done < ./dev-misc/release-file-include
-            tar -cvz --exclude-vcs -f /tmp/cloudflare-ddns-edgeos.tar.gz /tmp/cloudflare-ddns-edgeos/
+            tar -cvz --exclude-vcs -f /tmp/cloudflare-ddns-edgeos.tar.gz -C /tmp cloudflare-ddns-edgeos
             mkdir ./release_dir && mv /tmp/cloudflare-ddns-edgeos.tar.gz ./release_dir
         
         - name: Commit & Push to release branch
@@ -44,7 +44,7 @@ jobs:
             REPO: self
             BRANCH: releases
             FOLDER: release_dir
-            SQUASH_HISTORY: false
+            SQUASH_HISTORY: true
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             MESSAGE: ${{ steps.tagcheck.outputs.tagname }}
 
