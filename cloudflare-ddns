@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Cloudflare DDNS functions script
+
+set -o errexit
+# set -o xtrace
 
 
 ############################
@@ -10,6 +13,14 @@ export CF_ACCESS_TOKEN="" # Start with "Bearer "
 export ZONE_IDENTIFIER=""
 export RECORD_NAME=""
 
+LAN_IP_SEGMENTS="^$"
+LAN_IP_SEGMENTS="${LAN_IP_SEGMENTS}|(^10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$)"
+LAN_IP_SEGMENTS="${LAN_IP_SEGMENTS}|(^127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$)"
+LAN_IP_SEGMENTS="${LAN_IP_SEGMENTS}|(^169\.254\.[0-9]{1,3}\.[0-9]{1,3}$)"
+LAN_IP_SEGMENTS="${LAN_IP_SEGMENTS}|(^172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}$)"
+LAN_IP_SEGMENTS="${LAN_IP_SEGMENTS}|(^192\.168\.[0-9]{1,3}\.[0-9]{1,3}$)"
+
+readonly LAN_IP_SEGMENTS
 
 ############################
 # -- Utilities Function -- #
@@ -27,10 +38,20 @@ info() {
 # Cloudflare-ddns Section  #
 ############################
 
-
+#######################################
+# Get WAN ipv4 address via command-line tool `ip`,
+# if not available, or behind NAT, via remote api.
+# Globals:
+#   LAN_IP_SEGMENTS
+# Arguments:
+#   None
+# Outputs:
+#   None
+# Returns:
+#   Host ipv4 address, non-zero on error.
+#######################################
 get_wan_ipv4_addr() {
 
-    local lan_ip_segments
     local ipv4_addr
 
     if [[ ! "$(uname)" == "Linux" ]]; then
@@ -38,14 +59,7 @@ get_wan_ipv4_addr() {
         return 1
     fi
 
-    lan_ip_segments="^$"
     ipv4_addr=""
-
-    lan_ip_segments="${lan_ip_segments}|(^10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$)"
-    lan_ip_segments="${lan_ip_segments}|(^127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$)"
-    lan_ip_segments="${lan_ip_segments}|(^169\.254\.[0-9]{1,3}\.[0-9]{1,3}$)"
-    lan_ip_segments="${lan_ip_segments}|(^172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}$)"
-    lan_ip_segments="${lan_ip_segments}|(^192\.168\.[0-9]{1,3}\.[0-9]{1,3}$)"
 
     info "Getting Network Ip locally using cli-program ip..."
 
@@ -54,7 +68,7 @@ get_wan_ipv4_addr() {
             grep -v -E '\slo|\sdocker' |
             awk '{ print $4 }' |
             cut -d'/' -f1 |
-            grep -v -E "${lan_ip_segments}"
+            grep -v -E "${LAN_IP_SEGMENTS}"
     )
 
 
@@ -79,6 +93,21 @@ get_wan_ipv4_addr() {
 }
 
 
+#######################################
+# Get DNS Record detail from cloudflare v4 api using curl GET.
+# https://api.cloudflare.com/#dns-records-for-a-zone-list-dns-records
+# Globals:
+#   ZONE_IDENTIFIER
+#   CF_ACCESS_TOKEN
+#   RECORD_NAME
+# Arguments:
+#   None
+# Outputs:
+#   None
+# Returns:
+#   json-formatted: { "record_id": $id, "record_ip": $ip }
+#   , non-zero on error.
+#######################################
 getCurrent4Record() {
 
     local _retrieve_json
@@ -114,6 +143,22 @@ getCurrent4Record() {
 }
 
 
+#######################################
+# Create DNS Record using curl POST via cloudflare v4 api.
+# https://api.cloudflare.com/#dns-records-for-a-zone-create-dns-record
+# Globals:
+#   ZONE_IDENTIFIER
+#   CF_ACCESS_TOKEN
+#   RECORD_NAME
+# Arguments:
+#   host_ip: Host ipv4 address obtained from get_wan_ipv4_addr()
+# Outputs:
+#   None
+# Returns:
+#   None
+#
+# *Exists* Exit route for shell script.
+#######################################
 create4RecordIfNotExists() {
     
     local host_ip="$1"
@@ -151,6 +196,21 @@ create4RecordIfNotExists() {
 }
 
 
+#######################################
+# Update specific DNS record detail to cloudflare v4 api using curl PUT.
+# https://api.cloudflare.com/#dns-records-for-a-zone-update-dns-record
+# Globals:
+#   ZONE_IDENTIFIER
+#   CF_ACCESS_TOKEN
+#   RECORD_NAME
+# Arguments:
+#   pending_record_id: dns record id which needs updated.
+#   pending_record_ip: dns record ip/content which needs updates
+# Outputs:
+#   None
+# Returns:
+#   0 if record is updated successfully, non-zero on error.
+#######################################
 updateCurrent4Record() {
 
     local pending_record_id="$1"

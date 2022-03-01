@@ -1,13 +1,14 @@
-#!/bin/sh
-
+#!/bin/bash
+#
+# Entrance File and Config File for cloudflare-ddns.
 
 # Import utility function here
 # You `cloudflare-ddns` file ABSOLUTE PATH here!
 . /config/scripts/cloudflare-ddns-edgeos/cloudflare-ddns
 
-########
-# Alter here
-########
+#######################
+# -Config- Alter here #
+#######################
 
 # Access Token generated from Cloudflare API token page
 CF_ACCESS_TOKEN=""
@@ -19,8 +20,8 @@ ZONE_IDENTIFIER=""
 RECORD_NAME=""
 
 
-########
-# Alter stops
-########
+#######################
+# -Config- Stop here  #
+#######################
 
 main
