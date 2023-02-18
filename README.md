@@ -6,7 +6,9 @@
 [![License: WTFPL](https://img.shields.io/badge/License-WTFPL-blue.svg?style=for-the-badge)](http://www.wtfpl.net/about/)
 ![PR: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge)
 
-[Documentation/Usage mirror on mijazz.icu](https://mijazz.icu/posts/Documentation-for-cloudflare-ddns-edgeos/)
+[ !!! README !!!  Documentation/Usage - Refer to Blog Post](https://mijazzchan.github.io/posts/Documentation-for-cloudflare-ddns-edgeos/)
+
+
 
 ## Usage
 
