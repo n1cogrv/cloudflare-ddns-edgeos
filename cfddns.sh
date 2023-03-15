@@ -11,6 +11,8 @@
 #######################
 
 # Access Token generated from Cloudflare API token page
+# Example (Do forget the "Bearer" prefix):
+# CF_ACCESS_TOKEN="Bearer XXXXXXXXXXXXXXXXXXX"
 CF_ACCESS_TOKEN=""
 
 # Can be seen from your zone page, bottom right Zone id
