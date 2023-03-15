@@ -1,7 +1,7 @@
 # Cloudflare DDNS Script for EdgeOS
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/MijazzChan/cloudflare-ddns-edgeos?color=success&label=Latest&logo=github&style=for-the-badge)](https://github.com/MijazzChan/cloudflare-ddns-edgeos/releases)
-![GitHub Repo stars](https://img.shields.io/github/stars/MijazzChan/cloudflare-ddns-edgeos?color=blue&label=STARS&logo=github&style=for-the-badge)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/n1cogrv/cloudflare-ddns-edgeos?color=success&label=Latest&logo=github&style=for-the-badge)](https://github.com/MijazzChan/cloudflare-ddns-edgeos/releases)
+![GitHub Repo stars](https://img.shields.io/github/stars/n1cogrv/cloudflare-ddns-edgeos?color=blue&label=STARS&logo=github&style=for-the-badge)
 ![made-with-bash](https://img.shields.io/badge/Made%20with-Bash-1f425f.svg?style=for-the-badge)
 [![License: WTFPL](https://img.shields.io/badge/License-WTFPL-blue.svg?style=for-the-badge)](http://www.wtfpl.net/about/)
 ![PR: Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge)
@@ -30,7 +30,7 @@ Make sure you have following dependencies installed.
 cd /config/scripts/ && pwd
 # /config/scripts/
 
-curl -LS -o /config/scripts/cloudflare-ddns-edgeos.tar.gz https://github.com/MijazzChan/cloudflare-ddns-edgeos/raw/releases/cloudflare-ddns-edgeos.tar.gz
+curl -LS -o /config/scripts/cloudflare-ddns-edgeos.tar.gz https://github.com/n1cogrv/cloudflare-ddns-edgeos/raw/releases/cloudflare-ddns-edgeos.tar.gz
 ```
 
 #### 1.2 Trouble with GFW?
@@ -41,7 +41,7 @@ curl -LS -o /config/scripts/cloudflare-ddns-edgeos.tar.gz https://github.com/Mij
 cd /config/scripts/ && pwd
 # /config/scripts/
 
-curl -LS -o /config/scripts/cloudflare-ddns-edgeos.tar.gz https://cdn.jsdelivr.net/gh/MijazzChan/cloudflare-ddns-edgeos@releases/cloudflare-ddns-edgeos.tar.gz
+curl -LS -o /config/scripts/cloudflare-ddns-edgeos.tar.gz https://cdn.jsdelivr.net/gh/n1cogrv/cloudflare-ddns-edgeos@releases/cloudflare-ddns-edgeos.tar.gz
 ```
 
 
@@ -68,27 +68,27 @@ Variable in `cfddns.sh` - `CF_ACCESS_TOKEN`
 Visit [Cloudflare Api-tokens](https://dash.cloudflare.com/profile/api-tokens), Click `Create Token`.
 
 
-![Cloudflare Access Token 1](https://mijazz.icu/assets/img/blog/20220302/cf_token1.png)
+![Cloudflare Access Token 1](https://mijazzchan.github.io/assets/img/blog/20220302/cf_token1.png)
 
 Use Edit zone DNS template.
 
-![Cloudflare Token Template](https://mijazz.icu/assets/img/blog/20220302/cf_token2.png)
+![Cloudflare Token Template](https://mijazzchan.github.io/assets/img/blog/20220302/cf_token2.png)
 
 Fill in the form.
 
-![Cloudflare Token Detail](https://mijazz.icu/assets/img/blog/20220302/cf_token3.png)
+![Cloudflare Token Detail](https://mijazzchan.github.io/assets/img/blog/20220302/cf_token3.png)
 
 **Continue to Summary**, and **Create Token**.
 
 Copy following token string into `CF_ACCESS_TOKEN`, starting with `Bearer `.
 
-![Cloudflare Token String](https://mijazz.icu/assets/img/blog/20220302/cf_token4.png)
+![Cloudflare Token String](https://mijazzchan.github.io/assets/img/blog/20220302/cf_token4.png)
 
 ##### 2.2.2 - Zone Identifier
 
 Variable in `cfddns.sh` - `ZONE_IDENTIFIER`.
 
-![Zone Identifier](https://mijazz.icu/assets/img/blog/20220302/zone_id.png)
+![Zone Identifier](https://mijazzchan.github.io/assets/img/blog/20220302/zone_id.png)
 
 ##### 2.2.3 - Record Name
 
@@ -110,7 +110,7 @@ Before you set it as a scheduled task, dryrun/execute it first.
 ```
 If it creates and updates your domain record **both successfully and correctly**, proceed to next step. 
 
-**Otherwise**, feel free to [open a issue](https://github.com/MijazzChan/cloudflare-ddns-edgeos/issues/new)
+**Otherwise**, feel free to [open a issue](https://github.com/n1cogrv/cloudflare-ddns-edgeos/issues/new)
 
 ### 4 - Using `task-scheduler` to `cron` it
 
@@ -135,7 +135,7 @@ There're plenty of ddns(`ddns-client`) projects on Github.
 
 + Some of them are specifically optimized, ( or let's say ) , are only written for cloudflare ddns update, but in other language except `shell-script`.
 
-Thus, [cloudflare-ddns-edgeos](https://github.com/MijazzChan/cloudflare-ddns-edgeos) aims at 
+Thus, [cloudflare-ddns-edgeos](https://github.com/n1cogrv/cloudflare-ddns-edgeos) aims at 
 
 + For routers running EdgeOS (Ubiquiti EdgeRouter), light-weighted design.
 
